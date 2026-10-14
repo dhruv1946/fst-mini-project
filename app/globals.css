@@ -1,0 +1,446 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  /* MarketPress Exact Palette */
+  --mp-navy: #0b1e33;
+  --mp-navy-dark: #071524;
+  --mp-red: #e31b23;
+  --mp-red-hover: #c9141b;
+  --mp-text-dark: #222222;
+  --mp-text-gray: #666666;
+  --mp-text-light: #888888;
+  --mp-border: #e5e7eb;
+  --mp-border-light: #f1f3f5;
+  --mp-bg-light: #f5f6f8;
+  --mp-bg-white: #ffffff;
+  --mp-badge-gray: #eef0f4;
+
+  --font-heading: 'Montserrat', sans-serif;
+  --font-body: 'Open Sans', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #ffffff;
+  color: var(--mp-text-dark);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: var(--mp-red);
+}
+
+/* MarketPress Top Bar */
+.mp-topbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--mp-border);
+  padding: 8px 32px;
+  font-size: 12px;
+  color: var(--mp-text-gray);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mp-topbar a {
+  color: var(--mp-text-gray);
+}
+
+.mp-topbar a:hover {
+  color: var(--mp-red);
+}
+
+/* MarketPress Main Header */
+.mp-header-main {
+  background-color: var(--mp-navy);
+  color: #ffffff;
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+/* MarketPress Search Form */
+.mp-search-form {
+  flex: 1;
+  max-width: 680px;
+  display: flex;
+  background: #ffffff;
+  border-radius: 4px;
+  overflow: hidden;
+  height: 44px;
+}
+
+.mp-search-input {
+  flex: 1;
+  border: none;
+  padding: 0 16px;
+  font-size: 13px;
+  color: #222222;
+  outline: none;
+  font-family: var(--font-body);
+}
+
+.mp-search-select {
+  border: none;
+  border-left: 1px solid #e2e8f0;
+  padding: 0 14px;
+  font-size: 12px;
+  color: #555555;
+  background: #ffffff;
+  cursor: pointer;
+  outline: none;
+}
+
+.mp-search-btn {
+  background-color: var(--mp-red);
+  color: #ffffff;
+  border: none;
+  width: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.mp-search-btn:hover {
+  background-color: var(--mp-red-hover);
+}
+
+/* MarketPress Sub-Nav */
+.mp-subnav {
+  background: #ffffff;
+  border-bottom: 1px solid var(--mp-border);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 54px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+
+.mp-category-btn {
+  background: var(--mp-badge-gray);
+  color: var(--mp-navy);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  border: 1px solid #dce1e8;
+}
+
+.mp-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  color: #222222;
+}
+
+.mp-nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #222222;
+}
+
+.mp-nav-link:hover {
+  color: var(--mp-red);
+}
+
+.mp-badge-tag {
+  position: absolute;
+  top: -12px;
+  right: -8px;
+  background: var(--mp-red);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.mp-badge-tag.hot {
+  background: #ff5722;
+}
+
+/* Red Promo CTA box on the right of nav */
+.mp-promo-btn {
+  background: var(--mp-red);
+  color: #ffffff;
+  padding: 8px 24px;
+  border-radius: 3px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.2;
+  transition: background-color 0.15s ease;
+}
+
+.mp-promo-btn:hover {
+  background-color: var(--mp-red-hover);
+  color: #ffffff;
+}
+
+.mp-promo-sub {
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.95;
+  text-transform: none;
+}
+
+/* MarketPress Buttons */
+.btn-mp-red {
+  background: var(--mp-red);
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 12px 28px;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: all 0.15s ease;
+}
+
+.btn-mp-red:hover {
+  background: var(--mp-red-hover);
+  color: #ffffff;
+}
+
+.btn-mp-dark {
+  background: var(--mp-navy);
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 22px;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.btn-mp-dark:hover {
+  background: var(--mp-navy-dark);
+  color: #ffffff;
+}
+
+.btn-mp-outline {
+  background: #ffffff;
+  color: #222222;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 12px;
+  padding: 8px 18px;
+  border-radius: 3px;
+  border: 1px solid #d1d5db;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-mp-outline:hover {
+  border-color: var(--mp-red);
+  color: var(--mp-red);
+}
+
+/* Circular Discount Badge */
+.mp-discount-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--mp-red);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 13px;
+  line-height: 1.1;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(227, 27, 35, 0.35);
+}
+
+.mp-discount-circle span {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* MarketPress Product Card */
+.mp-product-card {
+  background: #ffffff;
+  border: 1px solid #f1f3f5;
+  border-radius: 4px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.mp-product-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+  transform: translateY(-3px);
+}
+
+.mp-product-image {
+  width: 100%;
+  height: 180px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin-bottom: 16px;
+}
+
+.mp-product-title {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  color: #222222;
+  margin-bottom: 8px;
+  line-height: 1.35;
+  height: 38px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.mp-product-pricing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-family: var(--font-heading);
+}
+
+.mp-price-old {
+  font-size: 13px;
+  color: #999999;
+  text-decoration: line-through;
+}
+
+.mp-price-current {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--mp-red);
+}
+
+/* Tab Filter Strip */
+.mp-tabs-filter {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  color: #666666;
+}
+
+.mp-tab-item {
+  cursor: pointer;
+  padding-bottom: 4px;
+  position: relative;
+  transition: color 0.15s ease;
+}
+
+.mp-tab-item.active {
+  color: var(--mp-red);
+}
+
+.mp-tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--mp-red);
+  border-radius: 2px;
+}
+
+/* Forms */
+input[type="text"], input[type="number"], select, textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  padding: 8px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: #222222;
+}
+
+input[type="text"]:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--mp-navy);
+}
+
+.mp-persona-card:hover {
+  border-color: #9ca3af !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.btn-oauth-google:hover {
+  background-color: #f9fafb !important;
+  border-color: #9ca3af !important;
+}
+
+.btn-oauth-github:hover {
+  opacity: 0.92 !important;
+}
+

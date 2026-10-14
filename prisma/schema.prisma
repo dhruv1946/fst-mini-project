@@ -1,0 +1,214 @@
+// Prisma Schema for Engineering Student Hardware & Academic Reference Marketplace
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  MODERATOR
+  ADMIN
+}
+
+enum ListingCategory {
+  HARDWARE_KIT
+  SENSOR
+  TEST_EQUIPMENT
+  REFERENCE_BOOK
+  OTHER
+}
+
+enum ConditionGrade {
+  NEW
+  LIKE_NEW
+  GOOD
+  FAIR
+  FUNCTIONAL
+}
+
+enum ListingType {
+  FOR_SALE
+  FOR_RENT
+  FOR_LEND
+}
+
+enum ItemStatus {
+  PENDING_APPROVAL
+  AVAILABLE
+  RESERVED
+  COMPLETED
+  REJECTED
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  ACTIVE
+  RETURNED
+  DISPUTED
+  CANCELLED
+}
+
+enum ForumCategory {
+  HARDWARE_DEBUG
+  SENSOR_HELP
+  CODE_SHARE
+  BOOK_RECOMMENDATION
+  GENERAL
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
+model User {
+  id                String         @id @default(uuid())
+  email             String         @unique
+  name              String
+  studentId         String?        @unique
+  university        String         @default("Tech Institute")
+  department        String         @default("Engineering")
+  isVerifiedStudent Boolean        @default(false)
+  role              Role           @default(STUDENT)
+  avatarUrl         String?
+  trustRating       Float          @default(5.0)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  listings          Listing[]      @relation("UserListings")
+  reservations      Reservation[]  @relation("UserReservations")
+  threads           ForumThread[]
+  replies           ForumReply[]
+  reportsFiled      DisputeReport[] @relation("ReportedByUser")
+}
+
+model Listing {
+  id              String            @id @default(uuid())
+  title           String
+  description     String
+  category        ListingCategory
+  condition       ConditionGrade
+  listingType     ListingType       @default(FOR_RENT)
+  price           Float             @default(0.0) // Daily rent or sale price
+  depositAmount   Float             @default(0.0) // Security deposit
+  status          ItemStatus        @default(AVAILABLE)
+  ownerId         String
+  owner           User              @relation("UserListings", fields: [ownerId], references: [id])
+  specs           Json?             // Tech specifications, chipsets, voltage, author/edition for books
+  accessories     String[]          @default([]) // e.g. ["Jumper wires", "USB-C cable"]
+  images          String[]          @default([])
+  location        String            @default("Campus EE Lab Desk 4")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  reservations    Reservation[]
+  reports         DisputeReport[]
+
+  @@index([category, status])
+  @@index([ownerId])
+}
+
+model Reservation {
+  id                String             @id @default(uuid())
+  listingId         String
+  listing           Listing            @relation(fields: [listingId], references: [id])
+  renterId          String
+  renter            User               @relation("UserReservations", fields: [renterId], references: [id])
+  status            ReservationStatus  @default(PENDING)
+  verificationToken String             @unique // Digital QR token for physical handoff
+  startDate         DateTime           @default(now())
+  returnDeadline    DateTime
+  totalCost         Float              @default(0.0)
+  depositHeld       Float              @default(0.0)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  receipt           TransactionReceipt?
+  disputes          DisputeReport[]
+
+  @@index([listingId])
+  @@index([renterId])
+}
+
+model TransactionReceipt {
+  id               String       @id @default(uuid())
+  reservationId    String       @unique
+  reservation      Reservation  @relation(fields: [reservationId], references: [id])
+  claimCode        String       @unique
+  digitalSignature String
+  snapshotTitle    String
+  snapshotPrice    Float
+  snapshotDeposit  Float
+  issuerBadge      String       @default("VERIFIED_STUDENT_CONSORTIUM")
+  createdAt        DateTime     @default(now())
+}
+
+model ForumThread {
+  id           String         @id @default(uuid())
+  title        String
+  content      String
+  category     ForumCategory  @default(GENERAL)
+  authorId     String
+  author       User           @relation(fields: [authorId], references: [id])
+  isPinned     Boolean        @default(false)
+  isSolved     Boolean        @default(false)
+  upvotes      Int            @default(0)
+  viewCount    Int            @default(0)
+  tags         String[]       @default([])
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  replies      ForumReply[]
+  reports      DisputeReport[]
+
+  @@index([category])
+}
+
+model ForumReply {
+  id         String       @id @default(uuid())
+  threadId   String
+  thread     ForumThread  @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  authorId   String
+  author     User         @relation(fields: [authorId], references: [id])
+  content    String
+  isSolution Boolean      @default(false)
+  upvotes    Int          @default(0)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@index([threadId])
+}
+
+model DisputeReport {
+  id             String         @id @default(uuid())
+  reason         String
+  details        String
+  status         DisputeStatus  @default(OPEN)
+  reporterId     String
+  reporter       User           @relation("ReportedByUser", fields: [reporterId], references: [id])
+  listingId      String?
+  listing        Listing?       @relation(fields: [listingId], references: [id])
+  reservationId  String?
+  reservation    Reservation?   @relation(fields: [reservationId], references: [id])
+  forumThreadId  String?
+  forumThread    ForumThread?   @relation(fields: [forumThreadId], references: [id])
+  moderatorNotes String?
+  resolvedAt     DateTime?
+  createdAt      DateTime       @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  actorId   String
+  details   Json
+  timestamp DateTime @default(now())
+}
