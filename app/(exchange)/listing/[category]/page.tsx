@@ -1,312 +1,255 @@
 import { DatabaseService } from '@/app/lib/db';
-import { claimItemAction } from '@/app/actions/listing-actions';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { 
-  ShieldCheck, 
-  Lock, 
-  MapPin, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Cpu, 
-  Clock, 
-  FileCheck, 
-  Zap, 
-  ChevronRight,
-  ArrowLeft,
-  Calendar,
-  Layers,
-  HelpCircle
-} from 'lucide-react';
+import { ChevronRight, Search } from 'lucide-react';
 
-export default async function ListingDetailPage({
+export default async function CategoryListingPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ category: string; id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  params: Promise<{ category: string }>;
+  searchParams: Promise<{ q?: string }>;
 }) {
-  const { category, id } = await params;
-  const { error } = await searchParams;
+  const { category } = await params;
+  const { q } = await searchParams;
 
-  const item = await DatabaseService.getListingById(id);
-  if (!item) {
-    notFound();
-  }
+  const listings = await DatabaseService.getListings(category, q);
 
-  const isAvailable = item.status === 'AVAILABLE';
+  const categoryTitles: Record<string, string> = {
+    ALL: 'All Engineering Equipment & Textbooks',
+    HARDWARE_KIT: 'Microcontroller Boards & Hardware Kits',
+    SENSOR: 'Sensors, Transducers & Actuator Breakouts',
+    TEST_EQUIPMENT: 'Digital Multimeters & Lab Test Equipment',
+    REFERENCE_BOOK: 'Academic Reference Books & Manuals',
+  };
 
-  const conditionClass = item.condition === 'NEW'
-    ? 'chip-new'
-    : item.condition === 'LIKE_NEW'
-    ? 'chip-like-new'
-    : item.condition === 'GOOD'
-    ? 'chip-good'
-    : 'chip-functional';
+  const title = categoryTitles[category] || 'Equipment Catalog';
 
   return (
-    <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '16px 20px 60px' }}>
+    <div>
       {/* Breadcrumb Navigation */}
-      <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <Link href="/" style={{ color: '#2563eb' }}>Marketplace</Link>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
+        fontSize: '13px',
+        color: '#666666',
+        marginBottom: '24px'
+      }}>
+        <Link href="/" style={{ color: '#666666' }}>Home</Link>
         <ChevronRight size={14} />
-        <Link href={`/listing/${category}`} style={{ color: '#2563eb' }}>{category.replace('_', ' ')}</Link>
+        <Link href="/listing/ALL" style={{ color: '#666666' }}>Catalog</Link>
         <ChevronRight size={14} />
-        <span style={{ color: '#0f172a', fontWeight: 600 }}>{item.title}</span>
+        <span style={{ color: 'var(--mp-red)', fontWeight: 700 }}>{title}</span>
       </div>
 
-      {/* Error alert if atomic concurrency failed */}
-      {error && (
-        <div style={{
-          background: '#fff1f2',
-          border: '1px solid #fecdd3',
-          borderRadius: '8px',
-          padding: '16px 20px',
-          marginBottom: '24px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          color: '#be123c',
-          fontSize: '13px'
+      {/* Main Grid: Left Filter Sidebar + Right Catalog Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '32px', alignItems: 'start' }}>
+        {/* Left Filter Sidebar */}
+        <aside style={{
+          background: '#ffffff',
+          border: '1px solid #e5e7eb',
+          borderRadius: '4px',
+          padding: '24px'
         }}>
-          <AlertTriangle size={20} color="#e11d48" />
-          <div>
-            <strong>Concurrency Lock Notice:</strong> {decodeURIComponent(error)}
-          </div>
-        </div>
-      )}
-
-      {/* Real Marketplace Product Layout: Left Visuals & Specs, Right Transaction Box */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'minmax(320px, 1fr) 360px',
-        gap: '36px',
-        alignItems: 'start'
-      }}>
-        {/* Left Column: Images, Condition, Specs, Included Accessories */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-          {/* Main Photo Card */}
-          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
-            <div style={{
-              height: '380px',
-              backgroundImage: `url(${item.images[0]})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              position: 'relative',
-              backgroundColor: '#f1f5f9'
+          {/* Categories Filter */}
+          <div style={{ marginBottom: '28px' }}>
+            <h3 style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: '15px',
+              fontWeight: 800,
+              color: '#111827',
+              marginBottom: '14px',
+              borderBottom: '2px solid #e5e7eb',
+              paddingBottom: '8px'
             }}>
-              <div style={{ position: 'absolute', top: '16px', left: '16px', display: 'flex', gap: '8px' }}>
-                <span className={`chip-condition ${conditionClass}`} style={{ fontSize: '12px', padding: '4px 10px' }}>
-                  {item.condition.replace('_', ' ')}
-                </span>
-                <span style={{
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  padding: '4px 10px',
-                  borderRadius: '4px',
-                  background: isAvailable ? '#ecfdf5' : '#fffbeb',
-                  color: isAvailable ? '#047857' : '#b45309',
-                  border: `1px solid ${isAvailable ? '#a7f3d0' : '#fde68a'}`
-                }}>
-                  {item.status}
-                </span>
-              </div>
-            </div>
+              Product Categories
+            </h3>
 
-            <div style={{ padding: '24px' }}>
-              <h1 style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.25, marginBottom: '12px' }}>
-                {item.title}
-              </h1>
-
-              <p style={{ fontSize: '14px', color: '#475569', lineHeight: 1.6, marginBottom: '20px' }}>
-                {item.description}
-              </p>
-
-              {/* Verified Owner Card */}
-              <div style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                padding: '16px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '12px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{
-                    width: '38px',
-                    height: '38px',
-                    borderRadius: '50%',
-                    background: '#047857',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    fontSize: '14px',
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px' }}>
+              <li>
+                <Link
+                  href="/listing/ALL"
+                  style={{
+                    color: category === 'ALL' ? 'var(--mp-red)' : '#444444',
+                    fontWeight: category === 'ALL' ? 700 : 500,
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    {item.ownerName.substring(0, 2).toUpperCase()}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      {item.ownerName}
-                      <span className="badge-verified-student">✓ Verified Student</span>
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#64748b' }}>
-                      Student ID: {item.ownerStudentId} • Campus Trust Rating: 4.9/5.0
-                    </div>
-                  </div>
-                </div>
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <span>All Equipment</span>
+                  <span style={{ color: '#888888' }}>({listings.length})</span>
+                </Link>
+              </li>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#059669', fontWeight: 600 }}>
-                  <MapPin size={15} />
-                  <span>{item.location}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+              <li>
+                <Link
+                  href="/listing/HARDWARE_KIT"
+                  style={{
+                    color: category === 'HARDWARE_KIT' ? 'var(--mp-red)' : '#444444',
+                    fontWeight: category === 'HARDWARE_KIT' ? 700 : 500,
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <span>Microcontroller Kits</span>
+                </Link>
+              </li>
 
-          {/* Technical Specifications Table */}
-          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '24px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Cpu size={18} color="#2563eb" />
-              <span>Verified Technical Specifications</span>
-            </h3>
+              <li>
+                <Link
+                  href="/listing/SENSOR"
+                  style={{
+                    color: category === 'SENSOR' ? 'var(--mp-red)' : '#444444',
+                    fontWeight: category === 'SENSOR' ? 700 : 500,
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <span>Sensors &amp; Actuators</span>
+                </Link>
+              </li>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
-              {Object.entries(item.specs).map(([k, v]) => (
-                <div key={k} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '12px' }}>
-                  <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>
-                    {k}
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>
-                    {v}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+              <li>
+                <Link
+                  href="/listing/TEST_EQUIPMENT"
+                  style={{
+                    color: category === 'TEST_EQUIPMENT' ? 'var(--mp-red)' : '#444444',
+                    fontWeight: category === 'TEST_EQUIPMENT' ? 700 : 500,
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <span>Test Equipment</span>
+                </Link>
+              </li>
 
-          {/* Included Accessories Checklist */}
-          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '24px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FileCheck size={18} color="#059669" />
-              <span>Verified Included Accessories</span>
-            </h3>
-
-            <ul style={{ listStyle: 'none', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
-              {item.accessories.map((acc) => (
-                <li key={acc} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#334155' }}>
-                  <CheckCircle2 size={16} color="#059669" />
-                  <span>{acc}</span>
-                </li>
-              ))}
+              <li>
+                <Link
+                  href="/listing/REFERENCE_BOOK"
+                  style={{
+                    color: category === 'REFERENCE_BOOK' ? 'var(--mp-red)' : '#444444',
+                    fontWeight: category === 'REFERENCE_BOOK' ? 700 : 500,
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <span>Academic Textbooks</span>
+                </Link>
+              </li>
             </ul>
           </div>
-        </div>
 
-        {/* Right Column: Sticky Reservation / Checkout Box */}
-        <div style={{ position: 'sticky', top: '80px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '12px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px' }}>
-              <div className="price-tag">
-                <span className="price-currency">$</span>
-                <span className="price-amount" style={{ fontSize: '28px' }}>{item.price.toFixed(2)}</span>
-                <span className="price-unit">/day</span>
-              </div>
-              <div style={{ fontSize: '12px', color: '#d97706', fontWeight: 700 }}>
-                Deposit: ${item.depositAmount.toFixed(2)}
-              </div>
-            </div>
-
-            <div style={{
-              background: '#f0fdf4',
-              border: '1px solid #bbf7d0',
-              borderRadius: '6px',
-              padding: '10px 12px',
-              fontSize: '12px',
-              color: '#166534',
-              lineHeight: 1.45,
-              marginBottom: '20px'
+          {/* Condition Filter */}
+          <div>
+            <h3 style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: '15px',
+              fontWeight: 800,
+              color: '#111827',
+              marginBottom: '14px',
+              borderBottom: '2px solid #e5e7eb',
+              paddingBottom: '8px'
             }}>
-              💡 <strong>Deposit Return Guarantee:</strong> Security deposit is held securely and returned upon verified return at ECE Lab 204.
+              Hardware Condition
+            </h3>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#555555' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input type="checkbox" defaultChecked />
+                <span>Like New (Verified Lab Condition)</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input type="checkbox" defaultChecked />
+                <span>Brand New</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input type="checkbox" defaultChecked />
+                <span>Good (Lab Tested)</span>
+              </label>
+            </div>
+          </div>
+        </aside>
+
+        {/* Right Catalog Area */}
+        <div>
+          {/* Top Sort / Status Bar */}
+          <div style={{
+            background: '#ffffff',
+            border: '1px solid #e5e7eb',
+            borderRadius: '4px',
+            padding: '12px 20px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '20px',
+            fontSize: '13px'
+          }}>
+            <div>
+              Showing <strong>1–{listings.length}</strong> of <strong>{listings.length}</strong> results
+              {q && <span> for &ldquo;<strong>{q}</strong>&rdquo;</span>}
             </div>
 
-            {isAvailable ? (
-              <form action={claimItemAction} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <input type="hidden" name="listingId" value={item.id} />
-                <input type="hidden" name="renterId" value="usr-marcus" />
+            <div style={{ color: '#666666' }}>
+              Sort by: <strong style={{ color: '#111827' }}>Featured Items</strong>
+            </div>
+          </div>
 
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#0f172a', marginBottom: '6px' }}>
-                    Select Rental Duration:
-                  </label>
-                  <select
-                    name="days"
-                    defaultValue="7"
+          {/* 3-Column Catalog Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+            gap: '20px'
+          }}>
+            {listings.map((item) => {
+              const retailPrice = (item.price * 15 + 20).toFixed(2);
+
+              return (
+                <div key={item.id} className="mp-product-card" style={{ textAlign: 'left', alignItems: 'stretch' }}>
+                  {/* Photo */}
+                  <div
+                    className="mp-product-image"
                     style={{
-                      width: '100%',
-                      background: '#f8fafc',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '8px',
-                      padding: '10px 12px',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      color: '#0f172a',
-                      outline: 'none'
+                      backgroundImage: `url(${item.images[0]})`,
+                      height: '170px'
                     }}
+                  />
+
+                  {/* Title */}
+                  <Link
+                    href={`/listing/${item.category}/${item.id}`}
+                    className="mp-product-title"
+                    style={{ height: '42px' }}
                   >
-                    <option value="3">3 Days (Lab Milestone) — ${(item.price * 3).toFixed(2)}</option>
-                    <option value="7">7 Days (Full Week) — ${(item.price * 7).toFixed(2)}</option>
-                    <option value="14">14 Days (Extended Sprint) — ${(item.price * 14).toFixed(2)}</option>
-                  </select>
-                </div>
+                    {item.title}
+                  </Link>
 
-                <button
-                  type="submit"
-                  className="btn-market-action"
-                  style={{ width: '100%', padding: '12px' }}
-                >
-                  <Zap size={16} />
-                  <span>Reserve Equipment Now</span>
-                </button>
-              </form>
-            ) : (
-              <div style={{
-                padding: '16px',
-                textAlign: 'center',
-                background: '#fffbeb',
-                border: '1px solid #fde68a',
-                borderRadius: '8px',
-                color: '#b45309'
-              }}>
-                <Clock size={20} style={{ margin: '0 auto 6px' }} />
-                <div style={{ fontWeight: 700, fontSize: '14px' }}>Currently on Loan</div>
-                <div style={{ fontSize: '12px', color: '#78350f', marginTop: '2px' }}>
-                  This equipment has been reserved by another student.
-                </div>
-              </div>
-            )}
+                  <div style={{ fontSize: '11px', color: '#666666', marginBottom: '8px' }}>
+                    Condition: <strong style={{ color: 'var(--mp-navy)' }}>{item.condition.replace('_', ' ')}</strong>
+                  </div>
 
-            {/* Atomic Transaction Protection Note */}
-            <div style={{
-              marginTop: '20px',
-              paddingTop: '16px',
-              borderTop: '1px solid #e2e8f0',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '10px',
-              fontSize: '12px',
-              color: '#64748b',
-              lineHeight: 1.45
-            }}>
-              <Lock size={16} color="#2563eb" style={{ flexShrink: 0, marginTop: '2px' }} />
-              <div>
-                <strong>Atomic Concurrency Lock:</strong> Guarantees item cannot be double-claimed at the exact same millisecond.
-              </div>
-            </div>
+                  {/* Pricing */}
+                  <div className="mp-product-pricing" style={{ justifyContent: 'flex-start', marginBottom: '10px' }}>
+                    <span className="mp-price-old">${retailPrice}</span>
+                    <span className="mp-price-current">${item.price.toFixed(2)}/day</span>
+                  </div>
+
+                  <div style={{ fontSize: '11px', color: '#888888', marginBottom: '14px' }}>
+                    Pickup: {item.location}
+                  </div>
+
+                  {/* Action Button */}
+                  <div style={{ marginTop: 'auto' }}>
+                    <Link
+                      href={`/listing/${item.category}/${item.id}`}
+                      className="btn-mp-red"
+                      style={{ width: '100%', padding: '8px 14px', fontSize: '12px' }}
+                    >
+                      Reserve Now
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
