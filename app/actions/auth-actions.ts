@@ -72,10 +72,10 @@ export async function loginWithCredentialsAction(formData: FormData) {
 }
 
 /**
- * OAuth Login: Google & GitHub authentication
+ * OAuth Login: GitHub authentication
  * Initiates the real OAuth 2.0 redirection flow
  */
-export async function loginWithOAuthAction(provider: 'google' | 'github', redirectTo?: string) {
+export async function loginWithOAuthAction(provider: 'github', redirectTo?: string) {
   const target = redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : '';
   redirect(`/api/auth/${provider}${target}`);
 }

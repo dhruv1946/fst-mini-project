@@ -35,37 +35,7 @@ export async function GET(
     let name = '';
     let avatarUrl = '';
 
-    if (provider === 'google') {
-      const clientId = process.env.GOOGLE_CLIENT_ID || '';
-      const clientSecret = process.env.GOOGLE_CLIENT_SECRET || '';
-
-      const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          code,
-          client_id: clientId,
-          client_secret: clientSecret,
-          redirect_uri: callbackUrl,
-          grant_type: 'authorization_code',
-        }),
-      });
-
-      const tokenData = await tokenRes.json();
-      if (!tokenData.access_token) {
-        console.error('Google OAuth token error:', tokenData);
-        return NextResponse.redirect(new URL('/login?error=oauth_token_failed', baseUrl));
-      }
-
-      const userRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-        headers: { Authorization: `Bearer ${tokenData.access_token}` },
-      });
-      const userData = await userRes.json();
-
-      email = userData.email;
-      name = userData.name || userData.email.split('@')[0];
-      avatarUrl = userData.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
-    } else if (provider === 'github') {
+    if (provider === 'github') {
       const clientId = process.env.GITHUB_CLIENT_ID || '';
       const clientSecret = process.env.GITHUB_CLIENT_SECRET || '';
 
