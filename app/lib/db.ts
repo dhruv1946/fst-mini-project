@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import {
   initialUsers,
   initialListings,
@@ -36,6 +37,83 @@ if (!global.__marketplaceDb) {
 }
 
 const memoryStore = global.__marketplaceDb;
+
+// Cookie persistence helpers for Serverless deployment (Vercel)
+async function getCookieCustomThreads(): Promise<ForumThreadData[]> {
+  try {
+    const cookieStore = await cookies();
+    const raw = cookieStore.get('mp_custom_threads')?.value;
+    if (!raw) return [];
+    const parsed = JSON.parse(decodeURIComponent(raw));
+    if (Array.isArray(parsed)) {
+      return parsed;
+    }
+  } catch {
+    // Outside request context or during static generation
+  }
+  return [];
+}
+
+async function saveCookieCustomThreads(threads: ForumThreadData[]): Promise<void> {
+  try {
+    const cookieStore = await cookies();
+    // Keep up to 8 threads, trim large text to guarantee staying well under the 4096-byte cookie boundary
+    let trimmed = threads.slice(0, 8).map((t) => ({
+      ...t,
+      content: t.content.length > 350 ? t.content.slice(0, 350) + '...' : t.content,
+      replies: (t.replies || []).slice(-4).map((r) => ({
+        ...r,
+        content: r.content.length > 250 ? r.content.slice(0, 250) + '...' : r.content,
+      })),
+    }));
+
+    while (trimmed.length > 1 && encodeURIComponent(JSON.stringify(trimmed)).length > 3400) {
+      trimmed.pop();
+    }
+
+    const serialized = encodeURIComponent(JSON.stringify(trimmed));
+    cookieStore.set('mp_custom_threads', serialized, {
+      path: '/',
+      httpOnly: false,
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      sameSite: 'lax',
+    });
+  } catch {
+    // Calling set() inside a Server Component render throws; safe to ignore
+  }
+}
+
+async function getCookieCustomListings(): Promise<ListingData[]> {
+  try {
+    const cookieStore = await cookies();
+    const raw = cookieStore.get('mp_custom_listings')?.value;
+    if (!raw) return [];
+    const parsed = JSON.parse(decodeURIComponent(raw));
+    if (Array.isArray(parsed)) return parsed;
+  } catch {
+    // Outside request context
+  }
+  return [];
+}
+
+async function saveCookieCustomListings(listings: ListingData[]): Promise<void> {
+  try {
+    const cookieStore = await cookies();
+    let trimmed = listings.slice(0, 8);
+    while (trimmed.length > 1 && encodeURIComponent(JSON.stringify(trimmed)).length > 3400) {
+      trimmed.pop();
+    }
+    const serialized = encodeURIComponent(JSON.stringify(trimmed));
+    cookieStore.set('mp_custom_listings', serialized, {
+      path: '/',
+      httpOnly: false,
+      maxAge: 60 * 60 * 24 * 30,
+      sameSite: 'lax',
+    });
+  } catch {
+    // Safe to ignore in read-only contexts
+  }
+}
 
 export class DatabaseService {
   /**
@@ -120,7 +198,23 @@ export class DatabaseService {
 
   // Listing methods
   static async getListings(category?: string, search?: string) {
-    let list = [...memoryStore.listings];
+    const listingMap = new Map<string, ListingData>();
+
+    // Seed listings first
+    for (const item of memoryStore.listings) {
+      listingMap.set(item.id, item);
+    }
+
+    // Merge cookie listings
+    const customListings = await getCookieCustomListings();
+    for (const item of customListings) {
+      listingMap.set(item.id, item);
+      if (!memoryStore.listings.some((l) => l.id === item.id)) {
+        memoryStore.listings.unshift(item);
+      }
+    }
+
+    let list = Array.from(listingMap.values());
     if (category && category !== 'ALL') {
       list = list.filter((item) => item.category === category);
     }
@@ -137,7 +231,18 @@ export class DatabaseService {
   }
 
   static async getListingById(id: string) {
-    return memoryStore.listings.find((l) => l.id === id) || null;
+    let item = memoryStore.listings.find((l) => l.id === id) || null;
+    if (item) return item;
+
+    const customListings = await getCookieCustomListings();
+    item = customListings.find((l) => l.id === id) || null;
+    if (item) {
+      if (!memoryStore.listings.some((l) => l.id === id)) {
+        memoryStore.listings.unshift(item);
+      }
+      return item;
+    }
+    return null;
   }
 
   static async createListing(newListing: Omit<ListingData, 'id' | 'createdAt'>) {
@@ -147,6 +252,11 @@ export class DatabaseService {
       createdAt: new Date().toISOString(),
     };
     memoryStore.listings.unshift(created);
+
+    const custom = await getCookieCustomListings();
+    const updated = [created, ...custom.filter((l) => l.id !== created.id)];
+    await saveCookieCustomListings(updated);
+
     return created;
   }
 
@@ -173,7 +283,35 @@ export class DatabaseService {
 
   // Forum methods
   static async getForumThreads(category?: string, search?: string) {
-    let threads = [...memoryStore.threads];
+    const threadMap = new Map<string, ForumThreadData>();
+
+    // 1. Initial memory threads
+    for (const t of memoryStore.threads) {
+      threadMap.set(t.id, t);
+    }
+
+    // 2. Cookie custom threads
+    const customThreads = await getCookieCustomThreads();
+    for (const ct of customThreads) {
+      const existing = threadMap.get(ct.id);
+      if (existing) {
+        if (ct.replies && ct.replies.length > existing.replies.length) {
+          existing.replies = ct.replies;
+        }
+        if (ct.upvotes > existing.upvotes) {
+          existing.upvotes = ct.upvotes;
+        }
+      } else {
+        threadMap.set(ct.id, ct);
+        if (!memoryStore.threads.some((t) => t.id === ct.id)) {
+          memoryStore.threads.unshift(ct);
+        }
+      }
+    }
+
+    let threads = Array.from(threadMap.values());
+    threads.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
     if (category && category !== 'ALL') {
       threads = threads.filter((t) => t.category === category);
     }
@@ -190,7 +328,19 @@ export class DatabaseService {
   }
 
   static async getForumThreadById(id: string) {
-    return memoryStore.threads.find((t) => t.id === id) || null;
+    let thread = memoryStore.threads.find((t) => t.id === id) || null;
+    if (thread) return thread;
+
+    const customThreads = await getCookieCustomThreads();
+    thread = customThreads.find((t) => t.id === id) || null;
+    if (thread) {
+      if (!memoryStore.threads.some((t) => t.id === id)) {
+        memoryStore.threads.unshift(thread);
+      }
+      return thread;
+    }
+
+    return null;
   }
 
   static async createForumThread(params: {
@@ -199,16 +349,22 @@ export class DatabaseService {
     category: ForumThreadData['category'];
     authorId: string;
     tags: string[];
+    authorName?: string;
   }) {
-    const author = memoryStore.users.find((u) => u.id === params.authorId) || memoryStore.users[0];
+    const author = memoryStore.users.find((u) => u.id === params.authorId) || {
+      id: params.authorId,
+      name: params.authorName || 'Campus Student',
+      isVerifiedStudent: true,
+    };
+
     const thread: ForumThreadData = {
       id: `th-${Date.now().toString(36)}`,
       title: params.title,
       content: params.content,
       category: params.category,
       authorId: author.id,
-      authorName: author.name,
-      authorVerified: author.isVerifiedStudent,
+      authorName: params.authorName || author.name,
+      authorVerified: author.isVerifiedStudent ?? true,
       isPinned: false,
       isSolved: false,
       upvotes: 0,
@@ -217,7 +373,13 @@ export class DatabaseService {
       createdAt: new Date().toISOString(),
       replies: [],
     };
+
     memoryStore.threads.unshift(thread);
+
+    const custom = await getCookieCustomThreads();
+    const updated = [thread, ...custom.filter((t) => t.id !== thread.id)];
+    await saveCookieCustomThreads(updated);
+
     return thread;
   }
 
@@ -225,42 +387,72 @@ export class DatabaseService {
     threadId: string;
     authorId: string;
     content: string;
+    authorName?: string;
   }) {
-    const thread = memoryStore.threads.find((t) => t.id === params.threadId);
+    const thread = await DatabaseService.getForumThreadById(params.threadId);
     if (!thread) return null;
-    const author = memoryStore.users.find((u) => u.id === params.authorId) || memoryStore.users[0];
+
+    const author = memoryStore.users.find((u) => u.id === params.authorId) || {
+      id: params.authorId,
+      name: params.authorName || 'Campus Student',
+      isVerifiedStudent: true,
+    };
 
     const reply = {
       id: `rep-${Date.now().toString(36)}`,
       threadId: thread.id,
       authorId: author.id,
-      authorName: author.name,
-      authorVerified: author.isVerifiedStudent,
+      authorName: params.authorName || author.name,
+      authorVerified: author.isVerifiedStudent ?? true,
       content: params.content,
       isSolution: false,
       upvotes: 0,
       createdAt: new Date().toISOString(),
     };
     thread.replies.push(reply);
+
+    const custom = await getCookieCustomThreads();
+    const existingIndex = custom.findIndex((t) => t.id === thread.id);
+    if (existingIndex >= 0) {
+      custom[existingIndex] = thread;
+      await saveCookieCustomThreads(custom);
+    } else {
+      await saveCookieCustomThreads([thread, ...custom]);
+    }
+
     return reply;
   }
 
   static async upvoteThread(id: string) {
-    const thread = memoryStore.threads.find((t) => t.id === id);
+    const thread = await DatabaseService.getForumThreadById(id);
     if (thread) {
       thread.upvotes += 1;
+      const custom = await getCookieCustomThreads();
+      const existing = custom.find((t) => t.id === id);
+      if (existing) {
+        existing.upvotes = thread.upvotes;
+        await saveCookieCustomThreads(custom);
+      }
       return thread.upvotes;
     }
     return 0;
   }
 
   static async markSolution(threadId: string, replyId: string) {
-    const thread = memoryStore.threads.find((t) => t.id === threadId);
+    const thread = await DatabaseService.getForumThreadById(threadId);
     if (!thread) return false;
     thread.isSolved = true;
     thread.replies.forEach((r) => {
       r.isSolution = r.id === replyId;
     });
+
+    const custom = await getCookieCustomThreads();
+    const existingIndex = custom.findIndex((t) => t.id === thread.id);
+    if (existingIndex >= 0) {
+      custom[existingIndex] = thread;
+      await saveCookieCustomThreads(custom);
+    }
+
     return true;
   }
 

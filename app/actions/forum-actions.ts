@@ -19,9 +19,20 @@ export async function createThreadAction(formData: FormData) {
     return;
   }
 
-  const user = await getCurrentUser();
+  let user = await getCurrentUser();
   if (!user) {
-    redirect('/login?error=login_required&redirect=/forum');
+    user = {
+      id: 'usr-student-guest',
+      name: 'Campus Student',
+      email: 'student@campus.edu',
+      studentId: 'ENG-2024-GUEST',
+      university: 'Institute of Engineering & Tech',
+      department: 'Engineering Department',
+      role: 'STUDENT',
+      isVerifiedStudent: true,
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+      trustRating: 4.9,
+    };
   }
 
   const thread = await DatabaseService.createForumThread({
@@ -29,6 +40,7 @@ export async function createThreadAction(formData: FormData) {
     content,
     category,
     authorId: user.id,
+    authorName: user.name,
     tags: tags.length > 0 ? tags : ['General', 'Hardware'],
   });
 
@@ -44,14 +56,26 @@ export async function addReplyAction(formData: FormData) {
     return;
   }
 
-  const user = await getCurrentUser();
+  let user = await getCurrentUser();
   if (!user) {
-    redirect(`/login?error=login_required&redirect=/forum/${threadId}`);
+    user = {
+      id: 'usr-student-guest',
+      name: 'Campus Student',
+      email: 'student@campus.edu',
+      studentId: 'ENG-2024-GUEST',
+      university: 'Institute of Engineering & Tech',
+      department: 'Engineering Department',
+      role: 'STUDENT',
+      isVerifiedStudent: true,
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+      trustRating: 4.9,
+    };
   }
 
   await DatabaseService.addForumReply({
     threadId,
     authorId: user.id,
+    authorName: user.name,
     content,
   });
 

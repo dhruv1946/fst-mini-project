@@ -1,14 +1,15 @@
 import { DatabaseService } from '@/app/lib/db';
 import { addReplyAction, upvoteThreadAction, markSolutionAction } from '@/app/actions/forum-actions';
+import { ForumReplySubmitButton } from '@/app/components/ForumSubmitButton';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { 
   ArrowLeft, 
   ThumbsUp, 
   CheckCircle, 
   ChevronRight, 
   Check, 
-  ShieldCheck 
+  ShieldCheck,
+  HelpCircle 
 } from 'lucide-react';
 
 export default async function ForumThreadDetailPage({
@@ -20,7 +21,48 @@ export default async function ForumThreadDetailPage({
   const thread = await DatabaseService.getForumThreadById(threadId);
 
   if (!thread) {
-    notFound();
+    return (
+      <div style={{ maxWidth: '800px', margin: '40px auto 80px', padding: '0 20px' }}>
+        <div style={{ background: '#ffffff', border: '1px solid #d5d9d9', borderRadius: '4px', padding: '36px', textAlign: 'center' }}>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            background: '#fef3c7',
+            color: '#b45309',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 16px',
+          }}>
+            <HelpCircle size={28} />
+          </div>
+          <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#0f1111', marginBottom: '8px' }}>
+            Discussion Not Found or Session Expired
+          </h1>
+          <p style={{ fontSize: '14px', color: '#565959', maxWidth: '500px', margin: '0 auto 24px', lineHeight: 1.5 }}>
+            This question may have been created in another session or serverless container. You can browse all community questions or post a new one.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <Link
+              href="/forum"
+              className="btn-amz-yellow"
+              style={{ padding: '8px 20px', display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}
+            >
+              <ArrowLeft size={16} />
+              <span>Back to Community Q&amp;A</span>
+            </Link>
+            <Link
+              href="/forum#ask"
+              className="btn-amz-secondary"
+              style={{ padding: '8px 20px', display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}
+            >
+              <span>Ask a Question</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -163,9 +205,7 @@ export default async function ForumThreadDetailPage({
             }}
           />
           <div>
-            <button type="submit" className="btn-amz-yellow" style={{ padding: '8px 22px' }}>
-              Submit Answer
-            </button>
+            <ForumReplySubmitButton />
           </div>
         </form>
       </div>

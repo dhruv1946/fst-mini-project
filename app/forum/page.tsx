@@ -1,5 +1,7 @@
 import { DatabaseService } from '@/app/lib/db';
 import { createThreadAction } from '@/app/actions/forum-actions';
+import { getCurrentUser } from '@/app/lib/auth';
+import { ForumSubmitButton } from '@/app/components/ForumSubmitButton';
 import Link from 'next/link';
 import { 
   Search, 
@@ -8,16 +10,20 @@ import {
   CheckCircle, 
   HelpCircle,
   PlusCircle,
-  Cpu
+  Cpu,
+  UserCheck
 } from 'lucide-react';
 
 export default async function ForumPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; q?: string }>;
+  searchParams: Promise<{ category?: string; q?: string; posted?: string }>;
 }) {
-  const { category, q } = await searchParams;
-  const threads = await DatabaseService.getForumThreads(category, q);
+  const { category, q, posted } = await searchParams;
+  const [threads, currentUser] = await Promise.all([
+    DatabaseService.getForumThreads(category, q),
+    getCurrentUser(),
+  ]);
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 20px 60px' }}>
@@ -50,6 +56,24 @@ export default async function ForumPage({
           />
         </form>
       </div>
+
+      {posted && (
+        <div style={{
+          background: '#ecfdf5',
+          border: '1px solid #a7f3d0',
+          borderRadius: '4px',
+          padding: '12px 16px',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          color: '#065f46',
+          fontSize: '13px',
+        }}>
+          <CheckCircle size={18} color="#059669" />
+          <span><strong>Success!</strong> Your engineering question has been published to the community board.</span>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px', alignItems: 'start' }}>
         {/* Main Q&A List */}
@@ -138,13 +162,48 @@ export default async function ForumPage({
         </div>
 
         {/* Right Sidebar: Post a Question form */}
-        <div style={{ background: '#ffffff', border: '1px solid #d5d9d9', borderRadius: '4px', padding: '20px' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#0f1111', marginBottom: '8px' }}>
+        <div id="ask" style={{ background: '#ffffff', border: '1px solid #d5d9d9', borderRadius: '4px', padding: '20px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#0f1111', marginBottom: '6px' }}>
             Don&apos;t see the answer you&apos;re looking for?
           </h2>
-          <p style={{ fontSize: '13px', color: '#565959', marginBottom: '16px' }}>
+          <p style={{ fontSize: '13px', color: '#565959', marginBottom: '14px' }}>
             Ask verified engineering students and course lab assistants.
           </p>
+
+          <div style={{
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '4px',
+            padding: '8px 12px',
+            marginBottom: '14px',
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{
+                width: '16px',
+                height: '16px',
+                borderRadius: '50%',
+                background: '#047857',
+                color: '#ffffff',
+                fontSize: '9px',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>✓</span>
+              <span>
+                Posting as: <strong>{currentUser ? currentUser.name : 'Campus Student'}</strong>
+              </span>
+            </div>
+            {!currentUser && (
+              <Link href="/login?redirect=/forum" style={{ color: '#007185', fontSize: '11px', fontWeight: 600 }}>
+                Sign In
+              </Link>
+            )}
+          </div>
 
           <form action={createThreadAction} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div>
@@ -190,6 +249,24 @@ export default async function ForumPage({
 
             <div>
               <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#0f1111', marginBottom: '4px' }}>
+                Tags (optional, comma-separated):
+              </label>
+              <input
+                type="text"
+                name="tags"
+                placeholder="e.g. ESP32, WiFi, Sensor"
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  border: '1px solid #888c8c',
+                  borderRadius: '4px',
+                  fontSize: '13px'
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#0f1111', marginBottom: '4px' }}>
                 Details &amp; Circuit Context:
               </label>
               <textarea
@@ -207,9 +284,7 @@ export default async function ForumPage({
               />
             </div>
 
-            <button type="submit" className="btn-amz-yellow" style={{ width: '100%', marginTop: '6px' }}>
-              Post Your Question
-            </button>
+            <ForumSubmitButton />
           </form>
         </div>
       </div>
