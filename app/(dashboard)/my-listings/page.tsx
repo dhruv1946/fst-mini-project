@@ -135,7 +135,7 @@ export default async function MyListingsPage() {
                 </Link>
 
                 <div style={{ fontSize: '12px', color: '#64748b' }}>
-                  Rate: <strong style={{ color: '#0f172a' }}>${item.price.toFixed(2)}/day</strong> • Security Deposit: ${item.depositAmount.toFixed(2)} • Hand-off: {item.location}
+                  Rate: <strong style={{ color: '#0f172a' }}>₹{item.price.toFixed(2)}/day</strong> • Security Deposit: ₹{item.depositAmount.toFixed(2)} • Hand-off: {item.location}
                 </div>
               </div>
 
@@ -202,7 +202,7 @@ export default async function MyListingsPage() {
                 </div>
 
                 <div style={{ fontSize: '12px', color: '#64748b' }}>
-                  Scheduled Return: <strong>{new Date(res.returnDeadline).toLocaleDateString()} at 17:00</strong> • Total: ${res.totalCost.toFixed(2)} (Deposit: ${res.depositHeld.toFixed(2)})
+                  Scheduled Return: <strong>{new Date(res.returnDeadline).toLocaleDateString()} at 17:00</strong> • Total: ₹{res.totalCost.toFixed(2)} (Deposit: ₹{res.depositHeld.toFixed(2)})
                 </div>
               </div>
 
@@ -284,16 +284,16 @@ export default async function MyListingsPage() {
 
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
-              Daily Rate ($/day)
+              Daily Rate (₹/day)
             </label>
-            <input type="number" step="0.5" name="price" defaultValue="3.00" style={{ width: '100%' }} />
+            <input type="number" step="5" name="price" defaultValue="100" style={{ width: '100%' }} />
           </div>
 
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
-              Refundable Deposit ($)
+              Refundable Deposit (₹)
             </label>
-            <input type="number" name="deposit" defaultValue="20.00" style={{ width: '100%' }} />
+            <input type="number" step="50" name="deposit" defaultValue="600" style={{ width: '100%' }} />
           </div>
 
           <div>

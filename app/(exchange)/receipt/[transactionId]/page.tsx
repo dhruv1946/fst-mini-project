@@ -115,12 +115,12 @@ export default async function TransactionReceiptPage({
 
             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
               <span>Rental Fee:</span>
-              <span style={{ color: '#0f172a' }}>${reservation.totalCost.toFixed(2)}</span>
+              <span style={{ color: '#0f172a' }}>₹{reservation.totalCost.toFixed(2)}</span>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
               <span>Refundable Security Deposit:</span>
-              <span style={{ color: '#d97706', fontWeight: 600 }}>${reservation.depositHeld.toFixed(2)}</span>
+              <span style={{ color: '#d97706', fontWeight: 600 }}>₹{reservation.depositHeld.toFixed(2)}</span>
             </div>
 
             <div style={{
@@ -133,7 +133,7 @@ export default async function TransactionReceiptPage({
               color: '#0f172a'
             }}>
               <span>Total Transaction Value:</span>
-              <span>${(reservation.totalCost + reservation.depositHeld).toFixed(2)}</span>
+              <span>₹{(reservation.totalCost + reservation.depositHeld).toFixed(2)}</span>
             </div>
           </div>
         </div>

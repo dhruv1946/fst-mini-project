@@ -137,7 +137,7 @@ export default async function HomePage() {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ fontSize: '14px', color: '#666666' }}>
-                Rate: <strong style={{ color: 'var(--mp-red)', fontSize: '18px' }}>$3.50/day</strong> (Deposit: $25)
+                Rate: <strong style={{ color: 'var(--mp-red)', fontSize: '18px' }}>₹120/day</strong> (Deposit: ₹800)
               </div>
               <Link href="/listing/HARDWARE_KIT/list-ard-01" className="btn-mp-outline">
                 Inspect Item &rarr;
@@ -161,7 +161,7 @@ export default async function HomePage() {
                 style={{ height: '110px', objectFit: 'cover', borderRadius: '4px', margin: 'auto' }}
               />
               <Link href="/listing/HARDWARE_KIT/list-esp-02" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--mp-red)', marginTop: '8px' }}>
-                $2.00/day &rarr;
+                ₹75/day &rarr;
               </Link>
             </div>
 
@@ -179,7 +179,7 @@ export default async function HomePage() {
                 style={{ height: '110px', objectFit: 'cover', borderRadius: '4px', margin: 'auto' }}
               />
               <Link href="/listing/TEST_EQUIPMENT/list-dmm-03" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--mp-red)', marginTop: '8px' }}>
-                $4.00/day &rarr;
+                ₹150/day &rarr;
               </Link>
             </div>
 
@@ -197,7 +197,7 @@ export default async function HomePage() {
                 style={{ height: '110px', objectFit: 'cover', borderRadius: '4px', margin: 'auto' }}
               />
               <Link href="/listing/SENSOR/list-sens-05" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--mp-red)', marginTop: '8px' }}>
-                $6.00 Sale &rarr;
+                ₹180 Sale &rarr;
               </Link>
             </div>
 
@@ -215,7 +215,7 @@ export default async function HomePage() {
                 style={{ height: '110px', objectFit: 'cover', borderRadius: '4px', margin: 'auto' }}
               />
               <Link href="/listing/REFERENCE_BOOK/list-book-04" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--mp-red)', marginTop: '8px' }}>
-                $1.50/day &rarr;
+                ₹50/day &rarr;
               </Link>
             </div>
           </div>
@@ -266,7 +266,7 @@ export default async function HomePage() {
           gap: '16px'
         }}>
           {listings.slice(0, 6).map((item) => {
-            const retailPrice = (item.price * 15 + 20).toFixed(2);
+            const retailPrice = Math.round(item.price * 8 + 350);
 
             return (
               <div key={item.id} className="mp-product-card">
@@ -283,8 +283,8 @@ export default async function HomePage() {
                 </Link>
 
                 <div className="mp-product-pricing">
-                  <span className="mp-price-old">${retailPrice}</span>
-                  <span className="mp-price-current">${item.price.toFixed(2)}/day</span>
+                  <span className="mp-price-old">₹{retailPrice}</span>
+                  <span className="mp-price-current">₹{item.price.toFixed(0)}/day</span>
                 </div>
 
                 <div style={{ fontSize: '11px', color: '#64748b', marginTop: '6px' }}>

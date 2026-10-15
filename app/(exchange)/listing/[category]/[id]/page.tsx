@@ -212,12 +212,12 @@ export default async function ListingDetailPage({
           <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '12px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px' }}>
               <div className="price-tag">
-                <span className="price-currency">$</span>
-                <span className="price-amount" style={{ fontSize: '28px' }}>{item.price.toFixed(2)}</span>
+                <span className="price-currency">₹</span>
+                <span className="price-amount" style={{ fontSize: '28px' }}>{item.price.toFixed(0)}</span>
                 <span className="price-unit">/day</span>
               </div>
               <div style={{ fontSize: '12px', color: '#d97706', fontWeight: 700 }}>
-                Deposit: ${item.depositAmount.toFixed(2)}
+                Deposit: ₹{item.depositAmount.toFixed(0)}
               </div>
             </div>
 
@@ -258,9 +258,9 @@ export default async function ListingDetailPage({
                       outline: 'none'
                     }}
                   >
-                    <option value="3">3 Days (Lab Milestone) — ${(item.price * 3).toFixed(2)}</option>
-                    <option value="7">7 Days (Full Week) — ${(item.price * 7).toFixed(2)}</option>
-                    <option value="14">14 Days (Extended Sprint) — ${(item.price * 14).toFixed(2)}</option>
+                    <option value="3">3 Days (Lab Milestone) — ₹{(item.price * 3).toFixed(0)}</option>
+                    <option value="7">7 Days (Full Week) — ₹{(item.price * 7).toFixed(0)}</option>
+                    <option value="14">14 Days (Extended Sprint) — ₹{(item.price * 14).toFixed(0)}</option>
                   </select>
                 </div>
 

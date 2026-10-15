@@ -201,7 +201,7 @@ export default async function CategoryListingPage({
             gap: '20px'
           }}>
             {listings.map((item) => {
-              const retailPrice = (item.price * 15 + 20).toFixed(2);
+              const retailPrice = Math.round(item.price * 8 + 350);
 
               return (
                 <div key={item.id} className="mp-product-card" style={{ textAlign: 'left', alignItems: 'stretch' }}>
@@ -229,8 +229,8 @@ export default async function CategoryListingPage({
 
                   {/* Pricing */}
                   <div className="mp-product-pricing" style={{ justifyContent: 'flex-start', marginBottom: '10px' }}>
-                    <span className="mp-price-old">${retailPrice}</span>
-                    <span className="mp-price-current">${item.price.toFixed(2)}/day</span>
+                    <span className="mp-price-old">₹{retailPrice}</span>
+                    <span className="mp-price-current">₹{item.price.toFixed(0)}/day</span>
                   </div>
 
                   <div style={{ fontSize: '11px', color: '#888888', marginBottom: '14px' }}>

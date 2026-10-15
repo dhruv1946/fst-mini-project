@@ -177,7 +177,7 @@ export default async function ModerationQueuePage() {
                     {item.title}
                   </div>
                   <div style={{ fontSize: '12px', color: '#64748b' }}>
-                    Lender: {item.ownerName} ({item.ownerStudentId}) • ${item.price}/day • {item.location}
+                    Lender: {item.ownerName} ({item.ownerStudentId}) • ₹{item.price}/day • {item.location}
                   </div>
                 </div>
 
