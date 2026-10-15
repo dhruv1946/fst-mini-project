@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MarketPress — Verified Campus Engineering Hardware & Textbook Exchange
 
-## Getting Started
+🌐 **Live Deployment:** [https://fst-mini-project-tan.vercel.app/](https://fst-mini-project-tan.vercel.app/)
 
-First, run the development server:
+MarketPress is a verified student-to-student marketplace and engineering community platform for borrowing and renting microcontrollers, sensor kits, lab test equipment, and academic reference textbooks.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Key Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+* **Verified Student Auth & Security**: Google and GitHub OAuth 2.0 single-sign-on with domain verification, credentials login, and role-based access control (`ADMIN` and `STUDENT`).
+* **Concurrency-Safe Atomic Reservations**: Mutex-locked reservation engine preventing double-claiming during simultaneous rental requests.
+* **Deep Hardware Technical Inspection**: Detailed product specs, pinouts, wear grading, security deposit terms, and designated lab pickup lockers.
+* **Digital Transaction Receipts**: Instant receipt generation with verification tokens and QR code handoff badges.
+* **Student Inventory Dashboard**: Private portal for monitoring active reservations, managing posted gear, and listing new hardware.
+* **Campus Tech Q&A Forum**: Peer-to-peer discussion threads, hardware debugging help, upvoting, and accepted solution badges.
+* **Moderator Queue**: Protected administrative desk for approving listings and managing dispute resolution.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🛠️ Technology Stack
 
-To learn more about Next.js, take a look at the following resources:
+* **Framework**: [Next.js 16](https://nextjs.org/) (App Router & React Server Components)
+* **Language**: [TypeScript](https://www.typescriptlang.org/)
+* **Database & ORM**: [Prisma ORM 7](https://www.prisma.io/) with dual-tier PostgreSQL & in-memory persistence
+* **Authentication**: OAuth 2.0 (Google & GitHub) + Cookie session management
+* **Styling**: Vanilla CSS with custom cyber-academic design tokens
+* **Icons**: [Lucide React](https://lucide.dev/)
+* **Deployment**: [Vercel](https://vercel.com/)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 💻 Getting Started Locally
 
-## Deploy on Vercel
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/dhruv1946/fst-mini-project.git
+   cd fst-mini-project
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. **Run development server**:
+   ```bash
+   npm run dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 🌐 Live URL
+Visit the live deployment at [https://fst-mini-project-tan.vercel.app/](https://fst-mini-project-tan.vercel.app/).
