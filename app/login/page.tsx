@@ -23,9 +23,10 @@ export default async function LoginPage({
     error?: string; 
     logged_out?: string; 
     redirect?: string; 
+    provider?: string;
   }>;
 }) {
-  const { error, logged_out, redirect = '/' } = await searchParams;
+  const { error, logged_out, redirect = '/', provider } = await searchParams;
   const currentUser = await getCurrentUser();
 
   return (
@@ -68,6 +69,33 @@ export default async function LoginPage({
         }}>
           <CheckCircle2 size={16} color="#059669" />
           <span>You have been signed out. Enter credentials to sign back in.</span>
+        </div>
+      )}
+
+      {error === 'oauth_config_missing' && (
+        <div style={{
+          background: '#fef3c7',
+          border: '1px solid #fde68a',
+          borderRadius: '8px',
+          padding: '16px 18px',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '12px',
+          color: '#92400e',
+          fontSize: '13px',
+          lineHeight: 1.5,
+        }}>
+          <AlertCircle size={20} color="#d97706" style={{ marginTop: '2px', flexShrink: 0 }} />
+          <div>
+            <strong style={{ display: 'block', fontSize: '14px', marginBottom: '4px', color: '#78350f' }}>
+              OAuth Client ID Required for {provider || 'Social'} Login:
+            </strong>
+            To enable real external account selection with Google/GitHub, add your registered <code>{provider === 'GitHub' ? 'GITHUB_CLIENT_ID' : 'GOOGLE_CLIENT_ID'}</code> and Secret to your <code>.env.local</code> or Vercel Environment Variables.
+            <div style={{ marginTop: '8px', fontSize: '12px', color: '#b45309' }}>
+              💡 Follow the instructions provided, or sign in instantly below using the Admin credentials.
+            </div>
+          </div>
         </div>
       )}
 

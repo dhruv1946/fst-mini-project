@@ -73,39 +73,11 @@ export async function loginWithCredentialsAction(formData: FormData) {
 
 /**
  * OAuth Login: Google & GitHub authentication
+ * Initiates the real OAuth 2.0 redirection flow
  */
 export async function loginWithOAuthAction(provider: 'google' | 'github', redirectTo?: string) {
-  const cookieStore = await cookies();
-  const users = await DatabaseService.getUsers();
-
-  const isGoogle = provider === 'google';
-  const email = isGoogle ? 'verified.student@gmail.com' : 'campus.developer@github.com';
-  const name = isGoogle ? 'Google Verified Student' : 'GitHub Verified Student';
-
-  let user = users.find((u) => u.email === email);
-  if (!user) {
-    user = await DatabaseService.createUser({
-      name,
-      email,
-      studentId: `ENG-2024-${Math.floor(1000 + Math.random() * 9000)}`,
-      university: 'Institute of Engineering & Tech',
-      department: isGoogle ? 'Electrical Engineering' : 'Computer Science & Systems',
-      role: 'STUDENT',
-      isVerifiedStudent: true,
-      avatarUrl: isGoogle
-        ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'
-        : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-      trustRating: 5.0,
-    });
-  }
-
-  cookieStore.set('session_user_id', user.id, { path: '/', httpOnly: true });
-  cookieStore.set('user_role', user.role || 'STUDENT', { path: '/', httpOnly: true });
-  cookieStore.set('user_email', user.email, { path: '/', httpOnly: true });
-  cookieStore.set('oauth_provider', provider, { path: '/', httpOnly: true });
-
-  revalidatePath('/', 'layout');
-  redirect(redirectTo || '/');
+  const target = redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : '';
+  redirect(`/api/auth/${provider}${target}`);
 }
 
 /**
