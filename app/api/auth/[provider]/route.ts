@@ -34,3 +34,5 @@ export async function GET(
 
   return NextResponse.redirect(new URL('/login?error=unsupported_provider', baseUrl));
 }
+
+export const POST = GET;
