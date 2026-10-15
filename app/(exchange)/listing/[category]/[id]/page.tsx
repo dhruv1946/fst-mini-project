@@ -237,7 +237,7 @@ export default async function ListingDetailPage({
             {isAvailable ? (
               <form action={claimItemAction} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <input type="hidden" name="listingId" value={item.id} />
-                <input type="hidden" name="renterId" value="usr-marcus" />
+                <input type="hidden" name="renterId" value="usr-admin" />
 
                 <div>
                   <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#0f172a', marginBottom: '6px' }}>

